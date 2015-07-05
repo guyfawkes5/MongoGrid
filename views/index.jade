@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1= title
+  div(ng-app='MongoUI')
+    div(ng-controller='MongoUICtrl')
+      div(ui-grid='gridOptions')
