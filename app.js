@@ -4,6 +4,10 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var Mongo = require('mongodb');
+var DB = Mongo.Db;
+var Server = Mongo.Server;
+var db, cn;
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -21,6 +25,20 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+
+app.get('/mongo/schema', function(req, res) {
+  console.log(cn);
+
+  /*MongoClient.command({
+    'mapreduce': coll.collectionName,
+    'map': function() {
+      for (var key in this) { emit(key, null); }
+    },
+    "reduce" : function(key, stuff) { return null; },
+    "out": "my_collection" + "_keys"
+  });*/
+});
 
 app.use('/', routes);
 app.use('/users', users);
@@ -56,5 +74,10 @@ app.use(function(err, req, res, next) {
   });
 });
 
-
 module.exports = app;
+
+db = new DB('test', new Server('localhost', 27017));
+
+db.open(function(err, cn) {
+  conn = cn;
+});
