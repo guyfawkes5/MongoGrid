@@ -6,10 +6,21 @@ var Mongo = require('mongodb'),
 
     db, cn;
 
+function map() {
+    for (var key in this) {
+        emit(key, null);
+    }
+}
+
+function reduce(key, stuff) {
+    return null;
+}
+
 function connect(url) {
     var connected = Q.defer();
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, database) {
         if (!err) {
+            db = database;
             connected.resolve(db);
         } else {
             connected.reject(err);
@@ -19,15 +30,12 @@ function connect(url) {
 }
 
 function getKeys() {
-    return {x: 'y'};
-    /*MongoClient.command({
-     'mapreduce': coll.collectionName,
-     'map': function() {
-     for (var key in this) { emit(key, null); }
-     },
-     "reduce" : function(key, stuff) { return null; },
-     "out": "my_collection" + "_keys"
-     });*/
+    db.collection('exchanges').mapReduce(map, reduce, {out: {replace: 'schema_keys'}}).then(function(coll) {
+        coll.find().toArray(function(err, docs) {
+            console.log(docs);
+        });
+    });
+    return {'x': 'y'};
 }
 
 module.exports = {
