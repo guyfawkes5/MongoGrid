@@ -16,7 +16,7 @@ app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
            .attr('y', function(d, i) {
                return i * 30;
            })
-           .attr('fill', blue)
+           .attr('fill', 'blue')
            .text(function(d) {
               return d;
            });

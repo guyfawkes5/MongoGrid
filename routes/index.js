@@ -9,7 +9,9 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/mongo/schema', function(req, res) {
-    res.json(db.getKeys());
+    db.getKeys().then(function(docs) {
+       res.json(docs);
+    });
 });
 
 module.exports = router;
