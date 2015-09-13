@@ -28,6 +28,8 @@ app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
            });
 
        var bounds = schema.node().getBBox();
-       schema.insert('rect', ':first-child').attr('width', bounds.width + (padding * 2)).attr('height', bounds.height + (padding * 2));
+       schema.insert('rect', ':first-child')
+           .attr('width', bounds.width + (padding * 2))
+           .attr('height', bounds.height + (padding * 2));
    });
 }]);

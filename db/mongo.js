@@ -15,7 +15,11 @@ module.exports = {
 
 function map() {
     function isObject(value) {
-        return value === Object(value) && !Array.isArray(value) && value.constructor.name !== 'BinData';
+        return value === Object(value) && !Array.isArray(value);
+    }
+
+    function isBuffer(value) {
+        return value.constructor.name === 'BinData';
     }
 
     function getNestedKeys(object, prefix, original) {
@@ -23,13 +27,13 @@ function map() {
 
         prefix = (prefix ? prefix + '$' : '');
 
-        if (isObject(object)) {
+        if (isObject(object) && !isBuffer(object)) {
             for (var key in object) {
                 if (object.hasOwnProperty(key)) {
                     var value = object[key],
                         builtKey = prefix + key;
 
-                    ret[builtKey] = null;
+                    ret[builtKey] = getType(value);
                     if (isObject(value)) {
                         getNestedKeys(value, builtKey, ret);
                     }
@@ -39,26 +43,64 @@ function map() {
         return ret;
     }
 
+    function getArrayType(array) {
+        var previousType = null;
+        for (var i = 0; i < array.length; i++) {
+            var value = array[i],
+                type = getType(value);
+
+            if (type === previousType || previousType === null) {
+                previousType = type;
+            } else {
+                previousType = 'Mixed';
+            }
+        }
+        return '[' + (previousType === null ? '' : previousType) + ']';
+    }
+
+
+    function getType(v) {
+        if (Array.isArray(v)) {
+            return getArrayType(v);
+        } else if (isBuffer(v)) {
+            return 'Byte';
+        } else if (isObject(v)) {
+            return '{}';
+        } else {
+            return typeof v;
+        }
+    }
+
     for (var key in this) {
-        emit(key, getNestedKeys(this[key]));
+        emit(key, {
+            keys: getNestedKeys(this[key]),
+            type: getType(this[key])
+        });
     }
 }
 
 function reduce(key, values) {
-    var reduced = {};
+    var reduced = {},
+        types = [];
 
     for (var i = 0; i < values.length - 1; i++) {
-        var value = values[i];
+        var parent = values[i],
+            keys = parent.keys;
 
-        for (var key in value) {
+        for (var key in keys) {
             if (reduced[key]) {
-                reduced[key]++;
+                reduced[key].$types.push(keys[key]);
             } else {
-                reduced[key] = 1;
+                reduced[key] = {
+                    $types: [keys[key]]
+                };
             }
         }
+
+        types.push(parent.type);
     }
-    reduced.$total = values.length;
+
+    reduced.$types = types;
 
     return reduced;
 }
@@ -93,8 +135,34 @@ function getKeys() {
 function splitKeys(docs) {
     var ret = {};
 
+
+    return docs;
     utils.each(docs, function(doc) {
-        ret[doc._id] = doc.value;
+        var subRet = {};
+        utils.each(doc.value, function(value, key) {
+            if (utils.beginsWith(key, KEY_SEPARATOR)) {
+                subRet[key] = value;
+            } else if (utils.contains(key, KEY_SEPARATOR)) {
+                var keys = key.split(KEY_SEPARATOR),
+                    current = subRet;
+
+                utils.each(keys, function(splitKey, index) {
+                    if (current[splitKey] === undefined) {
+                        current[splitKey] = {};
+                    }
+
+                    if (index === keys.length - 1) {
+                        current[splitKey][KEY_SEPARATOR + 'total'] = value;
+                    } else {
+                        current = current[splitKey];
+                    }
+                });
+            } else {
+                subRet[key] = {};
+                subRet[key][KEY_SEPARATOR + 'total'] = value;
+            }
+        });
+        ret[doc._id] = subRet;
     });
 
     return ret;
