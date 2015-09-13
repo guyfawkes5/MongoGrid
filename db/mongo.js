@@ -1,6 +1,5 @@
 var Mongo = require('mongodb'),
     MongoClient = Mongo.MongoClient,
-    Server = Mongo.Server,
 
     Q = require('q'),
 
@@ -9,11 +8,12 @@ var Mongo = require('mongodb'),
 function map() {
     for (var key in this) {
         emit(key, null);
+        emit('key', 1);
     }
 }
 
-function reduce(key, stuff) {
-    return null;
+function reduce(key, values) {
+    return values.length;
 }
 
 function connect(url) {
