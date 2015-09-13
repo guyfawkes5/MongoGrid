@@ -2,6 +2,9 @@ var Mongo = require('mongodb'),
     MongoClient = Mongo.MongoClient,
 
     Q = require('q'),
+    utils = require('../utils/utils'),
+
+    KEY_SEPARATOR = '$',
 
     db;
 
@@ -78,11 +81,21 @@ function getKeys() {
     db.collection('exchanges').mapReduce(map, reduce, {out: {replace: 'schema_keys'}}).then(function(coll) {
         coll.find().toArray(function(err, docs) {
             if (!err) {
-                gotKeys.resolve(docs);
+                gotKeys.resolve(splitKeys(docs));
             } else {
                 gotKeys.reject(err);
             }
         });
     });
     return gotKeys.promise;
+}
+
+function splitKeys(docs) {
+    var ret = {};
+
+    utils.each(docs, function(doc) {
+        ret[doc._id] = doc.value;
+    });
+
+    return ret;
 }

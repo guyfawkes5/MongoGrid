@@ -5,7 +5,8 @@ var express = require('express'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
 
-    routes = require('./routes/index'),
+    indexRoutes = require('./routes/index'),
+    dbRoutes = require('./routes/mongo'),
     db = require('./db/mongo'),
     app = express();
 
@@ -21,7 +22,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
+app.use('/', indexRoutes);
+app.use('/mongo', dbRoutes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
