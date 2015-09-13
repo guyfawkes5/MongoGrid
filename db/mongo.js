@@ -3,17 +3,61 @@ var Mongo = require('mongodb'),
 
     Q = require('q'),
 
-    db, cn;
+    db;
+
+module.exports = {
+    connect: connect,
+    getKeys: getKeys
+};
 
 function map() {
+    function isObject(value) {
+        return value === Object(value) && !Array.isArray(value) && value.constructor.name !== 'BinData';
+    }
+
+    function getNestedKeys(object, prefix, original) {
+        var ret = original || {};
+
+        prefix = (prefix ? prefix + '$' : '');
+
+        if (isObject(object)) {
+            for (var key in object) {
+                if (object.hasOwnProperty(key)) {
+                    var value = object[key],
+                        builtKey = prefix + key;
+
+                    ret[builtKey] = null;
+                    if (isObject(value)) {
+                        getNestedKeys(value, builtKey, ret);
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+
     for (var key in this) {
-        emit(key, null);
-        emit('key', 1);
+        emit(key, getNestedKeys(this[key]));
     }
 }
 
 function reduce(key, values) {
-    return values.length;
+    var reduced = {};
+
+    for (var i = 0; i < values.length - 1; i++) {
+        var value = values[i];
+
+        for (var key in value) {
+            if (reduced[key]) {
+                reduced[key]++;
+            } else {
+                reduced[key] = 1;
+            }
+        }
+    }
+    reduced.$total = values.length;
+
+    return reduced;
 }
 
 function connect(url) {
@@ -30,15 +74,15 @@ function connect(url) {
 }
 
 function getKeys() {
+    var gotKeys = Q.defer();
     db.collection('exchanges').mapReduce(map, reduce, {out: {replace: 'schema_keys'}}).then(function(coll) {
         coll.find().toArray(function(err, docs) {
-            console.log(docs);
+            if (!err) {
+                gotKeys.resolve(docs);
+            } else {
+                gotKeys.reject(err);
+            }
         });
     });
-    return {'x': 'y'};
+    return gotKeys.promise;
 }
-
-module.exports = {
-    connect: connect,
-    getKeys: getKeys
-};
