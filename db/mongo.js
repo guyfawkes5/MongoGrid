@@ -135,34 +135,25 @@ function getKeys() {
 function splitKeys(docs) {
     var ret = {};
 
-
-    return docs;
     utils.each(docs, function(doc) {
         var subRet = {};
+
         utils.each(doc.value, function(value, key) {
-            if (utils.beginsWith(key, KEY_SEPARATOR)) {
-                subRet[key] = value;
-            } else if (utils.contains(key, KEY_SEPARATOR)) {
-                var keys = key.split(KEY_SEPARATOR),
-                    current = subRet;
+            var isSystemProperty = utils.beginsWith(key, KEY_SEPARATOR),
+                isSplittableKey = utils.contains(key, KEY_SEPARATOR);
 
-                utils.each(keys, function(splitKey, index) {
-                    if (current[splitKey] === undefined) {
-                        current[splitKey] = {};
-                    }
+            if (isSystemProperty) {
+                console.log(value);
+            } else if (isSplittableKey) {
+                var splitKeys = key.split(KEY_SEPARATOR);
 
-                    if (index === keys.length - 1) {
-                        current[splitKey][KEY_SEPARATOR + 'total'] = value;
-                    } else {
-                        current = current[splitKey];
-                    }
-                });
+
             } else {
-                subRet[key] = {};
-                subRet[key][KEY_SEPARATOR + 'total'] = value;
+
             }
         });
-        ret[doc._id] = subRet;
+
+        ret[doc._id] = [];
     });
 
     return ret;
