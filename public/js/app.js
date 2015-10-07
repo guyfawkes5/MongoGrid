@@ -15,7 +15,7 @@ app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
        schema.append('g')
            .attr('transform', 'translate(' + padding + ', ' + padding + ')')
            .selectAll('text')
-           .data(response.data)
+           .data([response.data])
            .enter()
            .append('text')
            .attr('height', lineHeight)
@@ -24,7 +24,8 @@ app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
            })
            .attr('fill', 'white')
            .text(function(d) {
-              return d._id;
+               console.log(d);
+              return d;
            });
 
        var bounds = schema.node().getBBox();

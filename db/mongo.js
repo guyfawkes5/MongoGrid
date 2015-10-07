@@ -63,7 +63,7 @@ function map() {
         if (Array.isArray(v)) {
             return getArrayType(v);
         } else if (isBuffer(v)) {
-            return 'Byte';
+            return 'Buffer';
         } else if (isObject(v)) {
             return '{}';
         } else {
@@ -139,21 +139,25 @@ function splitKeys(docs) {
         var subRet = {};
 
         utils.each(doc.value, function(value, key) {
-            var isSystemProperty = utils.beginsWith(key, KEY_SEPARATOR),
-                isSplittableKey = utils.contains(key, KEY_SEPARATOR);
+            var isSplittableKey = utils.contains(key, KEY_SEPARATOR) && !utils.beginsWith(key, KEY_SEPARATOR);
 
-            if (isSystemProperty) {
-                console.log(value);
-            } else if (isSplittableKey) {
-                var splitKeys = key.split(KEY_SEPARATOR);
+            if (isSplittableKey) {
+                var splitKeys = key.split(KEY_SEPARATOR),
+                    current = subRet;
 
-
+                utils.each(splitKeys, function(splitKey, i) {
+                    if (i < splitKeys.length - 1) {
+                        current = current[splitKey] = {};
+                    } else {
+                        current[splitKey] = value;
+                    }
+                });
             } else {
-
+                subRet[key] = value;
             }
         });
 
-        ret[doc._id] = [];
+        ret[doc._id] = subRet;
     });
 
     return ret;
