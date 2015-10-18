@@ -15,32 +15,31 @@ module.exports = {
 
 function map() {
     function isObject(value) {
-        return value === Object(value) && !Array.isArray(value);
+        return value === Object(value) && !Array.isArray(value) && !isBuffer(value);
     }
 
     function isBuffer(value) {
         return value.constructor.name === 'BinData';
     }
 
-    function getNestedKeys(object, prefix, original) {
-        var ret = original || {};
-
-        prefix = (prefix ? prefix + '$' : '');
-
-        if (isObject(object) && !isBuffer(object)) {
+    function getNestedKeys(object) {
+        var ret = {};
+        if (isObject(object)) {
             for (var key in object) {
                 if (object.hasOwnProperty(key)) {
-                    var value = object[key],
-                        builtKey = prefix + key;
+                    var value = object[key];
 
-                    ret[builtKey] = getType(value);
-                    if (isObject(value)) {
-                        getNestedKeys(value, builtKey, ret);
-                    }
+                    ret[key] = {
+                        name: key,
+                        type: getType(value),
+                        cn: getNestedKeys(value)
+                    };
                 }
             }
+            return ret;
+        } else {
+            return null;
         }
-        return ret;
     }
 
     function getArrayType(array) {
@@ -73,36 +72,18 @@ function map() {
 
     for (var key in this) {
         emit(key, {
-            keys: getNestedKeys(this[key]),
+            name: key,
+            cn: getNestedKeys(this[key]),
             type: getType(this[key])
         });
     }
 }
 
 function reduce(key, values) {
-    var reduced = {},
-        types = [];
-
-    for (var i = 0; i < values.length - 1; i++) {
-        var parent = values[i],
-            keys = parent.keys;
-
-        for (var key in keys) {
-            if (reduced[key]) {
-                reduced[key].$types.push(keys[key]);
-            } else {
-                reduced[key] = {
-                    $types: [keys[key]]
-                };
-            }
-        }
-
-        types.push(parent.type);
-    }
-
-    reduced.$types = types;
-
-    return reduced;
+    return {
+        values: values,
+        key: key
+    };
 }
 
 function connect(url) {
@@ -133,32 +114,5 @@ function getKeys() {
 }
 
 function splitKeys(docs) {
-    var ret = {};
-
-    utils.each(docs, function(doc) {
-        var subRet = {};
-
-        utils.each(doc.value, function(value, key) {
-            var isSplittableKey = utils.contains(key, KEY_SEPARATOR) && !utils.beginsWith(key, KEY_SEPARATOR);
-
-            if (isSplittableKey) {
-                var splitKeys = key.split(KEY_SEPARATOR),
-                    current = subRet;
-
-                utils.each(splitKeys, function(splitKey, i) {
-                    if (i < splitKeys.length - 1) {
-                        current = current[splitKey] = {};
-                    } else {
-                        current[splitKey] = value;
-                    }
-                });
-            } else {
-                subRet[key] = value;
-            }
-        });
-
-        ret[doc._id] = subRet;
-    });
-
-    return ret;
+    return docs;
 }
