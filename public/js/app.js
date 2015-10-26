@@ -1,36 +1,41 @@
 var app = angular.module('MongoUI', []);
 
 app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
-    var chart = d3.select('#d3-cont').append('svg');
+    var width = window.innerWidth,
+        height = window.innerHeight,
 
-    var lineHeight = 30,
-        originX = 20,
-        originY = 0,
-        padding = 20;
+        chart = d3.select('#d3-cont').append('svg').attr('width', width).attr('height', height).append("g")
+            .attr("transform", "translate(40,0)"),
+
+        diagonal = d3.svg.diagonal().projection(function(d) { return [d.y, d.x]; }),
+
+        tree = d3.layout.tree().size([height, width / 2]);
 
    $http.get('/mongo/schema').then(function(response) {
-       var schema = chart.append('g')
-           .attr('transform', 'translate(' + originX + ', ' + originY + ')');
+       var nodes = tree.nodes(response.data),
+           links = tree.links(nodes),
 
-       schema.append('g')
-           .attr('transform', 'translate(' + padding + ', ' + padding + ')')
-           .selectAll('text')
-           .data([response.data])
-           .enter()
-           .append('text')
-           .attr('height', lineHeight)
-           .attr('y', function(d, i) {
-               return lineHeight * i;
-           })
-           .attr('fill', 'white')
-           .text(function(d) {
-               console.log(d);
-              return d;
-           });
+           link = chart.selectAll("path.link")
+           .data(links)
+           .enter().append("path")
+           .attr("class", "link")
+           .attr("d", diagonal),
 
-       var bounds = schema.node().getBBox();
-       schema.insert('rect', ':first-child')
-           .attr('width', bounds.width + (padding * 2))
-           .attr('height', bounds.height + (padding * 2));
+           node = chart.selectAll("g.node")
+           .data(nodes)
+           .enter().append("g")
+           .attr("class", "node")
+           .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+       node.append("circle")
+           .attr("r", 4.5);
+
+       node.append("text")
+           .attr("dx", function(d) { return d.children ? -8 : 8; })
+           .attr("dy", 3)
+           .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
+           .text(function(d) {  return d.name + ' (' + d.type + ')'; });
+
+       console.log(nodes, links, response.data);
    });
 }]);

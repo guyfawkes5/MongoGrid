@@ -80,9 +80,43 @@ function map() {
 }
 
 function reduce(key, values) {
+    var ret = {};
+
+    for (var i = 0; i < values.length; i++) {
+        var value = values[i];
+
+        if (ret[value.name]) {
+            if (ret[value.name].cn) {
+                apply(ret[value.name].cn, value.cn);
+            } else {
+                ret[value.name].cn = value.cn;
+            }
+
+            if (ret[value.name].type) {
+                if (ret[value.name].type !== value.type) {
+                    ret[value.name].type = 'Mixed';
+                }
+            } else {
+                ret[value.name].type = value.type;
+            }
+        } else {
+            ret[value.name] = {
+                type: value.type,
+                cn: value.cn
+            };
+        }
+    }
+
+    function apply(target, source) {
+        for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+                target[key] = source[key];
+            }
+        }
+    }
+
     return {
-        values: values,
-        key: key
+        schema: ret
     };
 }
 
@@ -114,5 +148,30 @@ function getKeys() {
 }
 
 function splitKeys(docs) {
-    return docs;
+    var ret = [];
+    utils.each(docs, function(doc) {
+        ret.push({
+            name: doc.value.name,
+            type: doc.value.type,
+            children: schemaToArray(doc.value.schema)
+        });
+    });
+    return {
+        name: 'schema',
+        children: ret
+    };
+}
+
+function schemaToArray(schema) {
+    var ret = [];
+
+    utils.each(schema, function(value, key) {
+        ret.push({
+            name: key,
+            type: value.type,
+            children: schemaToArray(value.cn)
+        });
+    });
+
+    return ret;
 }
