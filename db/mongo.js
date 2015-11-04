@@ -48,7 +48,7 @@ function map() {
             var value = array[i],
                 type = getType(value);
 
-            if (type === previousType || previousType === null || previousType === '[]') {
+            if (type === previousType || previousType === null) {
                 previousType = type;
             } else {
                 previousType = 'Mixed';
@@ -91,7 +91,7 @@ function reduce(key, values) {
 
         if (existing) {
             if (existing.cn) {
-                apply(ret[name].cn, cn);
+                apply(existing.cn, cn);
             } else {
                 existing.cn = cn;
             }
