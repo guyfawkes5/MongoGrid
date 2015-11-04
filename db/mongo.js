@@ -48,7 +48,7 @@ function map() {
             var value = array[i],
                 type = getType(value);
 
-            if (type === previousType || previousType === null) {
+            if (type === previousType || previousType === null || previousType === '[]') {
                 previousType = type;
             } else {
                 previousType = 'Mixed';
@@ -83,26 +83,30 @@ function reduce(key, values) {
     var ret = {};
 
     for (var i = 0; i < values.length; i++) {
-        var value = values[i];
+        var value = values[i],
+            name = value.name,
+            type = value.type,
+            cn = value.cn,
+            existing = ret[name];
 
-        if (ret[value.name]) {
-            if (ret[value.name].cn) {
-                apply(ret[value.name].cn, value.cn);
+        if (existing) {
+            if (existing.cn) {
+                apply(ret[name].cn, cn);
             } else {
-                ret[value.name].cn = value.cn;
+                existing.cn = cn;
             }
 
-            if (ret[value.name].type) {
-                if (ret[value.name].type !== value.type) {
-                    ret[value.name].type = 'Mixed';
+            if (existing.type) {
+                if (existing.type !== type) {
+                    existing.type = 'Mixed';
                 }
             } else {
-                ret[value.name].type = value.type;
+                existing.type = type;
             }
         } else {
-            ret[value.name] = {
-                type: value.type,
-                cn: value.cn
+            ret[name] = {
+                type: type,
+                cn: cn
             };
         }
     }
@@ -138,7 +142,8 @@ function getKeys() {
     db.collection('exchanges').mapReduce(map, reduce, {out: {replace: 'schema_keys'}}).then(function(coll) {
         coll.find().toArray(function(err, docs) {
             if (!err) {
-                gotKeys.resolve(splitKeys(docs));
+                var keys = splitKeys(docs);
+                gotKeys.resolve(keys);
             } else {
                 gotKeys.reject(err);
             }
@@ -149,13 +154,11 @@ function getKeys() {
 
 function splitKeys(docs) {
     var ret = [];
+
     utils.each(docs, function(doc) {
-        ret.push({
-            name: doc.value.name,
-            type: doc.value.type,
-            children: schemaToArray(doc.value.schema)
-        });
+        ret = ret.concat(schemaToArray(doc.value.schema));
     });
+
     return {
         name: 'schema',
         children: ret

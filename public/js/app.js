@@ -4,12 +4,14 @@ app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
     var width = window.innerWidth,
         height = window.innerHeight,
 
+        duration = 3000,
+
         chart = d3.select('#d3-cont').append('svg').attr('width', width).attr('height', height).append("g")
-            .attr("transform", "translate(40,0)"),
+            .attr("transform", "translate(100,0)"),
 
         diagonal = d3.svg.diagonal().projection(function(d) { return [d.y, d.x]; }),
 
-        tree = d3.layout.tree().size([height, width / 2]);
+        tree = d3.layout.tree().size([height, (width * 2) / 3]);
 
    $http.get('/mongo/schema').then(function(response) {
        var nodes = tree.nodes(response.data),
@@ -23,7 +25,8 @@ app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
 
            node = chart.selectAll("g.node")
            .data(nodes)
-           .enter().append("g")
+           .enter()
+           .append("g")
            .attr("class", "node")
            .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
@@ -34,8 +37,6 @@ app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
            .attr("dx", function(d) { return d.children ? -8 : 8; })
            .attr("dy", 3)
            .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
-           .text(function(d) {  return d.name + ' (' + d.type + ')'; });
-
-       console.log(nodes, links, response.data);
+           .text(function(d) {  return d.name + (d.type ? ' (' + d.type + ')' : '' ); });
    });
 }]);
