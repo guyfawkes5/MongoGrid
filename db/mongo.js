@@ -8,6 +8,10 @@ var Mongo = require('mongodb'),
 
     db;
 
+
+
+console.log(logHello);
+
 module.exports = {
     connect: connect,
     getKeys: getKeys
