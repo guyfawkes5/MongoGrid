@@ -80,7 +80,8 @@ function map() {
 }
 
 function reduce(key, values) {
-    var ret = {};
+    var ret = {},
+        outerBrackets = /^\[(.+)?\]$/;
 
     for (var i = 0; i < values.length; i++) {
         var value = values[i],
@@ -97,7 +98,7 @@ function reduce(key, values) {
             }
 
             if (existing.type) {
-                if (existing.type !== type) {
+                if ((existing.type !== type && !isArrayType(type)) || !compareArrayTypes(existing.type, type)) {
                     existing.type = 'Mixed';
                 }
             } else {
@@ -117,6 +118,23 @@ function reduce(key, values) {
                 target[key] = source[key];
             }
         }
+    }
+
+    function isArrayType(type) {
+        return outerBrackets.test(type);
+    }
+
+    function compareArrayTypes(firstArray, secondArray) {
+        var firstMatch = firstArray, secondMatch = secondArray,
+            firstInner, secondInner;
+
+
+        while ((firstMatch = outerBrackets.exec(firstMatch)) && (secondMatch = outerBrackets.exec(secondMatch))) {
+            firstInner = firstMatch = firstMatch[1];
+            secondInner = secondMatch = secondMatch[1];
+        }
+
+        return firstInner === secondInner || !firstInner || !secondInner;
     }
 
     return {
