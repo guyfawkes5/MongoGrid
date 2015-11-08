@@ -98,7 +98,9 @@ function reduce(key, values) {
             }
 
             if (existing.type) {
-                if ((existing.type !== type && !isArrayType(type)) || !compareArrayTypes(existing.type, type)) {
+                if (isArrayType(type)) {
+                    existing.type = mergeArrayTypes(existing.type, type);
+                } else if (existing.type !== type) {
                     existing.type = 'Mixed';
                 }
             } else {
@@ -124,7 +126,7 @@ function reduce(key, values) {
         return outerBrackets.test(type);
     }
 
-    function compareArrayTypes(firstArray, secondArray) {
+    function mergeArrayTypes(firstArray, secondArray) {
         var firstMatch = firstArray, secondMatch = secondArray,
             firstInner, secondInner;
 
@@ -134,7 +136,15 @@ function reduce(key, values) {
             secondInner = secondMatch = secondMatch[1];
         }
 
-        return firstInner === secondInner || !firstInner || !secondInner;
+        if (firstInner === secondInner) {
+            return firstArray;
+        } else if (firstInner === undefined) {
+            return secondArray;
+        } else if (secondInner === undefined) {
+            return firstArray;
+        } else {
+            return firstArray.replace(firstInner, 'Mixed');
+        }
     }
 
     return {
