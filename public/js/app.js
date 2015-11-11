@@ -33,6 +33,10 @@ app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
        node.append("circle")
            .attr("r", 4.5);
 
+       node.on('click', function(d) {
+           console.log(this, d);
+       });
+
        node.append("text")
            .attr("dx", function(d) { return d.children ? -8 : 8; })
            .attr("dy", 3)
