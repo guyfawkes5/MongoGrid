@@ -13,3 +13,11 @@
     stroke: #ccc;
     stroke-width: 1.5px;
 }
+
+.panel {
+    margin: 20px;
+}
+
+#background {
+    background-color: #999999;
+}
