@@ -1,17 +1,19 @@
-var app = angular.module('MongoUI', []);
+var app = angular.module('MongoUI', ['smart-table']);
 
 app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
-    var width = window.innerWidth,
-        height = window.innerHeight,
+    var cont = d3.select('#d3-cont'),
+        contEl = cont[0][0],
+        width = contEl.offsetWidth,
+        height = contEl.offsetHeight,
+        horizMargin = 120,
+        vertMargin = 20,
 
-        duration = 3000,
-
-        chart = d3.select('#d3-cont').append('svg').attr('width', width).attr('height', height).append("g")
-            .attr("transform", "translate(100,0)"),
+        chart = cont.append('svg').attr('width', width).attr('height', height).append("g")
+            .attr("transform", "translate(" + horizMargin + "," + vertMargin + ")"),
 
         diagonal = d3.svg.diagonal().projection(function(d) { return [d.y, d.x]; }),
 
-        tree = d3.layout.tree().size([height, (width * 2) / 3]);
+        tree = d3.layout.tree().size([height - (vertMargin * 2), width - (horizMargin * 2)]);
 
    $http.get('/mongo/schema').then(function(response) {
        var nodes = tree.nodes(response.data),
@@ -43,4 +45,9 @@ app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
            .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
            .text(function(d) {  return d.name + (d.type ? ' (' + d.type + ')' : '' ); });
    });
+
+    $scope.rowCollection = [{
+        name: 'URL',
+        value: '/request'
+    }];
 }]);

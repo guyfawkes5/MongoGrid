@@ -1,6 +1,20 @@
 extends layout
 
+mixin grid(config)
+  table.table.table-striped(st-table='rowCollection')
+    thead
+      tr
+        each value, key in config
+          th(st-sort=key)= value
+    tbody
+      tr(ng-repeat='row in rowCollection')
+        each value, key in config
+          td(ng-bind='row.#{key}')
+
+
 block content
   div(ng-app='MongoUI')
-    div(ng-controller='MongoUICtrl')
+    div#app-cont(ng-controller='MongoUICtrl')
       div#d3-cont.panel
+      div#values.panel
+        +grid({'name': 'Name', 'value': 'Value'})

@@ -14,8 +14,21 @@
     stroke-width: 1.5px;
 }
 
+#app-cont {
+    display: flex;
+}
+
+#d3-cont {
+    flex-grow: 1;
+}
+
+#values {
+    flex-grow: 1;
+}
+
 .panel {
     margin: 20px;
+    height: 400px;
 }
 
 #background {

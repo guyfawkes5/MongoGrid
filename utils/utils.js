@@ -1,7 +1,5 @@
 module.exports = {
-    each: each,
-    contains: contains,
-    beginsWith: beginsWith
+    each: each
 };
 
 function each(iter, fn, scope) {
@@ -16,16 +14,4 @@ function each(iter, fn, scope) {
         }
     }
     return iter;
-}
-
-function contains(str, sub) {
-    return str.indexOf(sub) > -1;
-}
-
-function beginsWith(str, sub) {
-    return str.indexOf(sub) === 0;
-}
-
-function remove(str, sub) {
-
 }
