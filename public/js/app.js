@@ -1,6 +1,6 @@
-var app = angular.module('MongoUI', ['smart-table']);
+var app = angular.module('MongoUI', ['mongoServices', 'smart-table']);
 
-app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
+app.controller('MongoUICtrl', ['$http', '$scope', 'MongoDB', function($http, $scope, MongoDB) {
     var cont = d3.select('#d3-cont'),
         contEl = cont[0][0],
         width = contEl.offsetWidth,
@@ -15,8 +15,8 @@ app.controller('MongoUICtrl', ['$http', '$scope', function($http, $scope) {
 
         tree = d3.layout.tree().size([height - (vertMargin * 2), width - (horizMargin * 2)]);
 
-   $http.get('/mongo/schema').then(function(response) {
-       var nodes = tree.nodes(response.data),
+    MongoDB.query().$promise.then(function(data) {
+       var nodes = tree.nodes(data),
            links = tree.links(nodes),
 
            link = chart.selectAll("path.link")

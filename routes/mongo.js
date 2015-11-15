@@ -9,4 +9,8 @@ router.get('/schema', function(req, res) {
     });
 });
 
+router.get('/', function(req, res) {
+   res.json(db.get(req.params.query));
+});
+
 module.exports = router;

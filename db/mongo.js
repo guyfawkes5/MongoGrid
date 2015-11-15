@@ -10,7 +10,8 @@ var Mongo = require('mongodb'),
 
 module.exports = {
     connect: connect,
-    getKeys: getKeys
+    getKeys: getKeys,
+    get: get
 };
 
 function map() {
@@ -178,6 +179,10 @@ function getKeys() {
         });
     });
     return gotKeys.promise;
+}
+
+function get(query) {
+    return {x: 1};
 }
 
 function splitKeys(docs) {
