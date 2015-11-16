@@ -1,0 +1,11 @@
+- var config = {'name': 'Name', 'value': 'Value'};
+
+table.table.table-striped(st-table='rowCollection')
+  thead
+    tr
+      each value, key in config
+        th(st-sort=key)= value
+  tbody
+    tr(ng-repeat='row in rowCollection')
+      each value, key in config
+        td(ng-bind='row.#{key}')

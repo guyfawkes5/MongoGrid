@@ -9,6 +9,7 @@
     "angular": "^1.4.4",
     "angular-bootstrap-npm": "^0.14.3",
     "angular-resource": "^1.4.7",
+    "angular-route": "^1.4.7",
     "angular-smart-table": "2.1.4",
     "body-parser": "^1.13.3",
     "bootstrap-css-only": "^3.3.5",

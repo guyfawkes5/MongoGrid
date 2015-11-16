@@ -4,8 +4,10 @@ var express = require('express'),
     logger = require('morgan'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
+    jadeStatic = require('connect-jade-static'),
 
-    indexRoutes = require('./routes/index'),
+
+indexRoutes = require('./routes/index'),
     dbRoutes = require('./routes/mongo'),
     db = require('./db/mongo'),
     app = express();
@@ -21,6 +23,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(jadeStatic({
+    baseDir: path.join(__dirname, '/public/partials'),
+    baseUrl: '/partials',
+    maxAge: 86400,
+    jade: {
+      pretty: true
+    }
+}));
 
 app.use('/', indexRoutes);
 app.use('/mongo', dbRoutes);
