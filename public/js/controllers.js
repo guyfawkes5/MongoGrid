@@ -1,15 +1,19 @@
 var mongoControllers = angular.module('mongoControllers', ['ngResource']);
 
-mongoControllers.controller('MongoUICtrl', ['$window', '$scope', 'MongoDB', function($window, $scope, MongoDB) {
+mongoControllers.controller('mongoController', ['MongoDB', function(MongoDB) {
+
+}]);
+
+mongoControllers.controller('d3Controller', ['$window', 'MongoDB', function($window, MongoDB) {
     var d3 = $window.d3,
-        cont = d3.select('#d3-cont'),
+        cont = d3.select('#chart-el'),
         contEl = cont[0][0],
         width = contEl.offsetWidth,
         height = contEl.offsetHeight,
         horizMargin = 120,
         vertMargin = 20,
 
-        chart = cont.append('svg').attr('width', width).attr('height', height).append("g")
+        chart = cont.select('svg').attr('width', width).attr('height', height).append("g")
             .attr("transform", "translate(" + horizMargin + "," + vertMargin + ")"),
 
         diagonal = d3.svg.diagonal().projection(function(d) { return [d.y, d.x]; }),
@@ -46,9 +50,11 @@ mongoControllers.controller('MongoUICtrl', ['$window', '$scope', 'MongoDB', func
             .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
             .text(function(d) {  return d.name + (d.type ? ' (' + d.type + ')' : '' ); });
     });
+}]);
 
+mongoControllers.controller('valueGridController', ['$scope', function($scope) {
     $scope.rowCollection = [{
-        name: 'URL',
+        name: 'xyz',
         value: '/request'
     }];
 }]);
