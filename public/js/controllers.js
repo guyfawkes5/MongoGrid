@@ -1,20 +1,10 @@
 var mongoControllers = angular.module('mongoControllers', ['ngResource']);
 
-mongoControllers.controller('mongoController', ['$scope', 'MongoDB', function($scope, MongoDB) {
-    $scope.$on('chart-ready', function(event) {
-       MongoDB.query().$promise.then(function(resource) {
-           $scope.$broadcast('chart-data-ready', resource.toJSON());
-       });
-    });
+mongoControllers.controller('mongoController', [function() {
+
 }]);
 
-mongoControllers.controller('chartContainer', ['$scope', '$window', 'MongoDB', function($scope, $window, MongoDB) {
-    $scope.$on('chart-data-ready', function(event, data) {
-        console.log(arguments);
-    });
-
-    $scope.$emit('chart-ready');
-
+mongoControllers.controller('chartContainer', ['$scope', '$window', 'MongoDB', 'SchemaTree', function($scope, $window, MongoDB, SchemaTree) {
     var d3 = $window.d3,
         cont = d3.select('#chart-el'),
         contEl = cont[0][0],
