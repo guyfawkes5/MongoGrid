@@ -1,16 +1,5 @@
 extends layout
 
-mixin grid(config)
-    table.table.table-striped(st-table='rowCollection')
-        thead
-            tr
-                each value, key in config
-                    th(st-sort=key)= value
-        tbody
-            tr(ng-repeat='row in rowCollection')
-                each value, key in config
-                    td(ng-bind='row.#{key}')
-
 block content
-    div(ng-app='MongoUI')
-        div(ng-view)#background
+    div(ng-app='MongoUI')#background
+        div(ng-view)

@@ -38,4 +38,6 @@
 
 #background {
     background-color: #999999;
+    width: 100vw;
+    height: 100vh;
 }

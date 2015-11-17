@@ -8,9 +8,9 @@ directives.directive('valueGrid', [function() {
     };
 }]);
 
-directives.directive('d3Container', [function() {
+directives.directive('chartContainer', [function() {
     return {
-        controller: 'd3Controller',
+        controller: 'chartContainer',
         templateUrl: 'partials/d3container.html',
         restrict: 'A'
     };
