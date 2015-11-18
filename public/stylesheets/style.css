@@ -32,9 +32,10 @@
 }
 
 .panel {
-    margin: 5vh 5vw 5vh 5vw;
+    margin: 5vh 2vw;
     height: 90vh;
     overflow: auto;
+    margin-bottom: 5vh !important;
 }
 
 #background {
