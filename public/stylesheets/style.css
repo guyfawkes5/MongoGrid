@@ -23,8 +23,8 @@
 }
 
 #chart-el {
-    width: 100%;
-    height: 100%;
+    width: 99%;
+    height: 99%;
 }
 
 #values {
@@ -32,8 +32,9 @@
 }
 
 .panel {
-    margin: 20px;
-    height: 400px;
+    margin: 5vh 5vw 5vh 5vw;
+    height: 90vh;
+    overflow: auto;
 }
 
 #background {
