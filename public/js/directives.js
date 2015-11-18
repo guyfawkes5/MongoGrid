@@ -11,7 +11,7 @@ directives.directive('valueGrid', [function() {
 directives.directive('chartContainer', [function() {
     return {
         controller: 'chartContainer',
-        templateUrl: 'partials/d3container.html',
+        templateUrl: 'partials/chartContainer.html',
         restrict: 'A'
     };
 }]);
