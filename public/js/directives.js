@@ -15,3 +15,14 @@ directives.directive('chartContainer', [function() {
         restrict: 'A'
     };
 }]);
+
+directives.directive('resize', ['$window', function($window) {
+    return {
+        link: function(scope) {
+            angular.element($window).on('resize', function(e) {
+                scope.$broadcast('resize');
+            });
+        },
+        restrict: 'A'
+    };
+}]);

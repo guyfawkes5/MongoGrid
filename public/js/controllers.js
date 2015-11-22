@@ -4,22 +4,33 @@ mongoControllers.controller('mongoController', [function() {
 
 }]);
 
-mongoControllers.controller('chartContainer', ['$scope', '$window', 'MongoDB', 'SchemaTree', function($scope, $window, MongoDB, SchemaTree) {
-    var d3 = $window.d3,
-        cont = d3.select('#chart-el'),
-        contEl = cont[0][0],
+mongoControllers.controller('chartContainer', ['$element', '$window', '$scope', 'SchemaTree', 'MongoDB', function($element, $window, $scope, SchemaTree, MongoDB) {
+    var chartEl = $element.children(),
         chart = SchemaTree()
-            .width(contEl.offsetWidth)
-            .height(contEl.offsetHeight)
+            .width(chartEl.prop('offsetWidth'))
+            .height(chartEl.prop('offsetHeight'))
             .horizMargin(120)
-            .vertMargin(20);
+            .vertMargin(20)
+            .onClick(function(data) {
+                if (data.depth === 0) {
+                    return;
+                }
 
-    $window.onresize = function() {
-        chart.width(contEl.offsetWidth).height(contEl.offsetHeight).redraw();
-    };
+                var qualifiedName = [data.name];
+
+                while ((data = data.parent) && data.depth > 0) {
+                    qualifiedName.unshift(data.name)
+                }
+
+                MongoDB.get({queryString: qualifiedName.join('.')});
+            });
+
+    $scope.$on('resize', function() {
+        chart.width(chartEl.prop('offsetWidth')).height(chartEl.prop('offsetHeight')).draw();
+    });
 
     MongoDB.query().$promise.then(function(data) {
-        cont.datum(data.toJSON()).call(chart);
+        chart.data(data.toJSON()).draw(chartEl);
     });
 }]);
 

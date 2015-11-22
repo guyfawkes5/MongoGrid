@@ -181,8 +181,22 @@ function getKeys() {
     return gotKeys.promise;
 }
 
-function get(query) {
-    return {x: 1};
+function get(queryString) {
+    var queryResponse = Q.defer();
+        query = {}, filter = {};
+
+    query[queryString] = {$exists: true};
+    filter[queryString] = true;
+
+    db.collection('exchanges').find(query, filter, function(err, cursor) {
+        if (!err) {
+            queryResponse.resolve(cursor.toArray());
+        } else {
+            queryResponse.reject(err);
+        }
+    });
+
+    return queryResponse.promise;
 }
 
 function splitKeys(docs) {

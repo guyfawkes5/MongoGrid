@@ -10,7 +10,9 @@ router.get('/schema', function(req, res) {
 });
 
 router.get('/', function(req, res) {
-   res.json(db.get(req.params.query));
+   db.get(req.query.queryString).then(function(docs) {
+       res.json(docs);
+   });
 });
 
 module.exports = router;

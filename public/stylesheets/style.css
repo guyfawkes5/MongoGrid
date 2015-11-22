@@ -15,11 +15,11 @@
 }
 
 #app-cont {
-    display: flex;
+    display: inline-flex;
 }
 
 #d3-cont {
-    flex-grow: 1;
+    width: 70vw;
 }
 
 #chart-el {
@@ -28,14 +28,14 @@
 }
 
 #values {
-    flex-grow: 1;
+    width: 22vw;
 }
 
 .panel {
-    margin: 5vh 2vw;
-    height: 90vh;
+    margin: 2vh 2vw;
+    height: 96vh;
     overflow: auto;
-    margin-bottom: 5vh !important;
+    margin-bottom: 2vh !important;
 }
 
 #background {
