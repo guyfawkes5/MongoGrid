@@ -183,7 +183,10 @@ function getKeys() {
 
 function get(queryString) {
     var queryResponse = Q.defer();
-        query = {}, filter = {};
+        query = {},
+        filter = {
+            _id: false
+        };
 
     query[queryString] = {$exists: true};
     filter[queryString] = true;

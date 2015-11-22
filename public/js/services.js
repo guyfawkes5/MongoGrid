@@ -4,11 +4,12 @@ mongoServices.factory('MongoDB', ['$resource', function($resource) {
     return $resource('mongo/:verb', {}, {
         get: {
             method: 'GET',
+            isArray: true,
             params: {
                 query: '@queryString'
             }
         },
-        query: {
+        schema: {
             method: 'GET',
             params: {
                 verb: 'schema'
