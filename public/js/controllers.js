@@ -1,8 +1,8 @@
 var mongoControllers = angular.module('mongoControllers', ['ngResource']);
 
 mongoControllers.controller('mongoController', ['$scope', function($scope) {
-    $scope.$on('schemaClick', function(event, queryString) {
-        $scope.$broadcast('schemaLoad', queryString);
+    $scope.$on('schemaClick', function(event, data) {
+        $scope.$broadcast('schemaLoad', data);
     });
 }]);
 
@@ -18,13 +18,17 @@ mongoControllers.controller('chartContainer', ['$element', '$window', '$scope', 
                     return;
                 }
 
-                var qualifiedName = [data.name];
+                var keys = [data.name],
+                    type = data.type;
 
                 while ((data = data.parent) && data.depth > 0) {
-                    qualifiedName.unshift(data.name);
+                    keys.unshift(data.name);
                 }
 
-                $scope.$emit('schemaClick', qualifiedName.join('.'));
+                $scope.$emit('schemaClick', {
+                    keys: keys,
+                    type: type
+                });
             });
 
     $scope.$on('resize', function() {
@@ -37,25 +41,44 @@ mongoControllers.controller('chartContainer', ['$element', '$window', '$scope', 
 }]);
 
 mongoControllers.controller('valueGridController', ['$scope', 'MongoDB', function($scope, MongoDB) {
-    $scope.$on('schemaLoad', function(event, queryString) {
-        MongoDB.get({queryString: queryString}).$promise.then(function(rows) {
-            var formatted = [];
+    $scope.$on('schemaLoad', function(event, lookup) {
+        var keys = lookup.keys,
+            type = lookup.type,
+            previousValues;
+
+        MongoDB.get({queryString: keys.join('.')}).$promise.then(function(rows) {
+            var formatted = [],
+                name = keys.join('.');
 
             angular.forEach(rows, function(row) {
                 var data = row.toJSON(),
-                    keys = [];
+                    value = data;
 
-                while (angular.isObject(data)) {
-                    angular.forEach(data, function(value, key) {
-                        keys.push(key);
-                        data = value;
-                    });
+                angular.forEach(keys, function(key) {
+                    value = value[key];
+                });
+
+                if (angular.isObject(value)) {
+                    value = type;
                 }
 
-                formatted.push({
-                    name: keys.join('.'),
-                    value: data
+                var match = null;
+
+                angular.forEach(formatted, function(entry) {
+                    if (entry.value === value) {
+                        match = entry;
+                    }
                 });
+
+                if (match) {
+                    match.count++;
+                } else {
+                    formatted.push({
+                       name: name,
+                       value: value,
+                       count: 1
+                   });
+                }
             });
 
             $scope.rowCollection = formatted;
