@@ -14,21 +14,7 @@ mongoControllers.controller('chartContainer', ['$element', '$window', '$scope', 
             .horizMargin(120)
             .vertMargin(20)
             .onClick(function(data) {
-                if (data.depth === 0) {
-                    return;
-                }
-
-                var keys = [data.name],
-                    type = data.type;
-
-                while ((data = data.parent) && data.depth > 0) {
-                    keys.unshift(data.name);
-                }
-
-                $scope.$emit('schemaClick', {
-                    keys: keys,
-                    type: type
-                });
+                $scope.$emit('schemaClick', parseItemToParents(data));
             });
 
     $scope.$on('resize', function() {
@@ -38,50 +24,70 @@ mongoControllers.controller('chartContainer', ['$element', '$window', '$scope', 
     MongoDB.schema().$promise.then(function(data) {
         chart.data(data.toJSON()).draw(chartEl);
     });
+
+    function parseItemToParents(data) {
+        if (data.depth === 0) {
+            return;
+        }
+
+        var keys = [data.name],
+            type = data.type;
+
+        while ((data = data.parent) && data.depth > 0) {
+            keys.unshift(data.name);
+        }
+
+        return {
+            keys: keys,
+            type: type
+        };
+    }
 }]);
 
 mongoControllers.controller('valueGridController', ['$scope', 'MongoDB', function($scope, MongoDB) {
     $scope.$on('schemaLoad', function(event, lookup) {
         var keys = lookup.keys,
-            type = lookup.type,
-            previousValues;
+            type = lookup.type;
 
-        MongoDB.get({queryString: keys.join('.')}).$promise.then(function(rows) {
-            var formatted = [],
-                name = keys.join('.');
+        MongoDB.get({queryString: keys.join('.')}).$promise.then(function(data) {
+            $scope.rowCollection = formatToRows(data, keys, type);
+        });
+    });
 
-            angular.forEach(rows, function(row) {
-                var data = row.toJSON(),
-                    value = data;
+    function formatToRows(data, schemaKeys, schemaType) {
+        var rows = [],
+            name = schemaKeys.join('.');
 
-                angular.forEach(keys, function(key) {
-                    value = value[key];
-                });
+        angular.forEach(data, function(row) {
+            var value = row.toJSON();
 
-                if (angular.isObject(value)) {
-                    value = type;
-                }
+            angular.forEach(schemaKeys, function (key) {
+                value = value[key];
+            });
 
-                var match = null;
+            if (angular.isObject(value)) {
+                value = schemaType;
+            }
 
-                angular.forEach(formatted, function(entry) {
-                    if (entry.value === value) {
-                        match = entry;
-                    }
-                });
+            var match = null;
 
-                if (match) {
-                    match.count++;
-                } else {
-                    formatted.push({
-                       name: name,
-                       value: value,
-                       count: 1
-                   });
+            angular.forEach(rows, function (entry) {
+                if (entry.value === value) {
+                    match = entry;
                 }
             });
 
-            $scope.rowCollection = formatted;
+            if (match) {
+                match.count++;
+            } else {
+                rows.push({
+                    name: name,
+                    value: value,
+                    count: 1
+                });
+            }
         });
-    });
+
+        return rows;
+    }
 }]);
