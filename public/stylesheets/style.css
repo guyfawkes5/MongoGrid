@@ -1,45 +1,49 @@
-.node circle {
-    fill: #fff;
-    stroke: steelblue;
-    stroke-width: 1.5px;
-}
-
-.node text {
-    font: 10px sans-serif;
-}
-
-.link {
-    fill: none;
-    stroke: #ccc;
-    stroke-width: 1.5px;
-}
-
 #app-cont {
-    display: inline-flex;
-}
+  display: inline-flex; }
 
 #d3-cont {
-    width: 60vw;
-}
-
-#chart-el {
+  width: 60vw; }
+  #d3-cont #chart-el {
     width: 99%;
-    height: 99%;
-}
+    height: 99%; }
+    #d3-cont #chart-el .node {
+      cursor: pointer; }
+      #d3-cont #chart-el .node circle {
+        fill: #fff;
+        stroke: steelblue;
+        stroke-width: 1.5px; }
+      #d3-cont #chart-el .node text {
+        font: 10px sans-serif; }
+    #d3-cont #chart-el .link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 1.5px; }
 
 #values {
-    width: 32vw;
-}
+  width: 32vw; }
 
 .panel {
-    margin: 2vh 2vw;
-    height: 96vh;
-    overflow: auto;
-    margin-bottom: 2vh !important;
-}
+  margin: 2vh 2vw;
+  height: 96vh;
+  overflow: auto;
+  margin-bottom: 2vh !important; }
 
 #background {
-    background-color: #999999;
-    width: 100vw;
-    height: 100vh;
-}
+  background-color: #999999;
+  width: 100vw;
+  height: 100vh; }
+
+.value-grid table thead tr th {
+  cursor: pointer;
+  white-space: nowrap; }
+  .value-grid table thead tr th:after {
+    content: '\0020';
+    margin-left: 5px;
+    width: 1em;
+    display: inline-block; }
+  .value-grid table thead tr th.st-sort-ascent:after {
+    content: '\25B2'; }
+  .value-grid table thead tr th.st-sort-descent:after {
+    content: '\25BC'; }
+
+/*# sourceMappingURL=style.css.map */

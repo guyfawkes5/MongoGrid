@@ -51,6 +51,7 @@ mongoControllers.controller('valueGridController', ['$scope', 'MongoDB', functio
 
         MongoDB.get({queryString: keys.join('.')}).$promise.then(function(data) {
             $scope.rowCollection = formatToRows(data, keys, type);
+            $scope.displayedCollection = [].concat($scope.rowCollection);
         });
     });
 
@@ -90,4 +91,9 @@ mongoControllers.controller('valueGridController', ['$scope', 'MongoDB', functio
 
         return rows;
     }
+
+    $scope.gridFilter = function(row, index, rows) {
+        console.log(row, index, rows);
+        return false;
+    };
 }]);

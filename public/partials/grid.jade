@@ -1,12 +1,12 @@
 - var config = {'name': 'Name', 'value': 'Value', 'count': 'Count'};
     
-div
-    table.table.table-striped(st-table='rowCollection')
+div.value-grid
+    table.table.table-striped(st-table='displayedCollection', st-safe-src='rowCollection')
       thead
         tr
           each value, key in config
             th(st-sort=key)= value
       tbody
-        tr(ng-repeat='row in rowCollection')
+        tr(ng-repeat='row in displayedCollection ')
           each value, key in config
             td(ng-bind='row.#{key}')

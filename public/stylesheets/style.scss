@@ -1,0 +1,75 @@
+#app-cont {
+    display: inline-flex;
+}
+
+#d3-cont {
+    width: 60vw;
+
+    #chart-el {
+        width: 99%;
+        height: 99%;
+
+        .node {
+            cursor: pointer;
+
+            circle {
+                fill: #fff;
+                stroke: steelblue;
+                stroke-width: 1.5px;
+            }
+
+            text {
+                font: 10px sans-serif;
+            }
+        }
+
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 1.5px;
+        }
+    }
+}
+
+#values {
+    width: 32vw;
+}
+
+.panel {
+    margin: 2vh 2vw;
+    height: 96vh;
+    overflow: auto;
+    margin-bottom: 2vh !important;
+}
+
+#background {
+    background-color: #999999;
+    width: 100vw;
+    height: 100vh;
+}
+
+.value-grid {
+
+    table {
+
+        thead tr th {
+            cursor: pointer;
+            white-space: nowrap;
+
+            &:after {
+                content: '\0020';
+                margin-left: 5px;
+                width: 1em;
+                display: inline-block;
+            }
+
+            &.st-sort-ascent:after {
+                content: '\25B2';
+            }
+
+            &.st-sort-descent:after {
+                content: '\25BC';
+            }
+        }
+    }
+}
