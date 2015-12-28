@@ -25,6 +25,8 @@ mongoControllers.controller('chartContainer', ['$element', '$window', '$scope', 
         chart.data(data.toJSON()).draw(chartEl);
     });
 
+    $window.chart = chart;
+
     function parseItemToParents(data) {
         if (data.depth === 0) {
             return;
@@ -53,6 +55,10 @@ mongoControllers.controller('valueGridController', ['$scope', 'MongoDB', functio
             $scope.rowCollection = formatToRows(data, keys, type);
             $scope.displayedCollection = [].concat($scope.rowCollection);
         });
+    });
+
+    $scope.$on('select', function($event, data) {
+        console.log(arguments);
     });
 
     function formatToRows(data, schemaKeys, schemaType) {
@@ -91,9 +97,4 @@ mongoControllers.controller('valueGridController', ['$scope', 'MongoDB', functio
 
         return rows;
     }
-
-    $scope.gridFilter = function(row, index, rows) {
-        console.log(row, index, rows);
-        return false;
-    };
 }]);

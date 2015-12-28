@@ -13,8 +13,8 @@
             cursor: pointer;
 
             circle {
-                fill: #fff;
-                stroke: steelblue;
+                fill: #FFFFFF;
+                stroke: #F48542;
                 stroke-width: 1.5px;
             }
 
@@ -22,11 +22,9 @@
                 font: 10px sans-serif;
             }
         }
-
-        .link {
+        .brace, .link {
             fill: none;
-            stroke: #ccc;
-            stroke-width: 1.5px;
+            stroke: #444444;
         }
     }
 }
@@ -70,6 +68,11 @@
             &.st-sort-descent:after {
                 content: '\25BC';
             }
+        }
+
+        tbody tr.st-selected {
+            color: #FFFFFF;
+            background-color: #F48542;
         }
     }
 }

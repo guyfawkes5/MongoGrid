@@ -7,6 +7,6 @@ div.value-grid
           each value, key in config
             th(st-sort=key)= value
       tbody
-        tr(ng-repeat='row in displayedCollection ')
+        tr(ng-repeat='row in displayedCollection', st-select-row='row', st-select-mode='single', ng-click='rowClick(row)')
           each value, key in config
             td(ng-bind='row.#{key}')
