@@ -1,6 +1,6 @@
 var charts = angular.module('MongoCharts', []);
 
-charts.factory('SchemaTree', ['$window', function($window) {
+charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUtils) {
     return function() {
         var d3 = $window.d3,
             data,
@@ -79,7 +79,20 @@ charts.factory('SchemaTree', ['$window', function($window) {
                 nodes = tree.nodes(data),
                 links = tree.links(nodes),
 
-                outerLinks = links.filter(function(attr) {
+                braceTarget = [links[0].target, links[links.length - 1].target].reduce(function(prev, curr) {
+                    return {
+                        first: {
+                            x: prev.x,
+                            y: prev.y
+                        },
+                        second: {
+                            x: curr.x,
+                            y: curr.y
+                        }
+                    };
+                }),
+
+                outerLinks = links.filter(function (attr) {
                     var children = attr.source.children,
                         childIndex = children.indexOf(attr.target),
                         isFirst = (childIndex === 0),
@@ -94,7 +107,7 @@ charts.factory('SchemaTree', ['$window', function($window) {
                     .append('path')
                     .attr('class', 'brace')
                     .attr('d', braces)
-                    .attr('stroke-width', function(d) {
+                    .attr('stroke-width', function (d) {
                         var target = d.target,
                             other = findOpposingTarget(d.source, target),
                             dx = (other.x - target.x),
@@ -102,18 +115,6 @@ charts.factory('SchemaTree', ['$window', function($window) {
                             dist = Math.sqrt((dx * dx) + (dy * dy));
 
                         return (Math.round(dist) / 100) + 'px';
-                    }),
-
-                link = svg.selectAll('path.link')
-                    .data(outerLinks)
-                    .enter()
-                    .append('path')
-                    .attr('stroke-dasharray', '5,5')
-                    .attr('class', 'link')
-                    .attr('stroke-width', '2px')
-                    .attr('d', function(d) {
-                        return 'M' + [d.source.y, d.source.x]
-                            + 'L' + [d.target.y, d.source.x];
                     }),
 
                 node = svg.selectAll('g.node')
@@ -135,7 +136,7 @@ charts.factory('SchemaTree', ['$window', function($window) {
                 .text(function (d) {
                     return d.name + (d.type ? ' (' + d.type + ')' : '' );
                 });
-
+            console.log(braceTarget);
             if (clickListener) {
                 node.on('click', clickListener);
             }
@@ -207,5 +208,33 @@ charts.factory('SchemaTree', ['$window', function($window) {
         };
 
         return SchemaTree;
+    };
+}]);
+
+charts.factory('ChartUtils', [function() {
+    return {
+        distance: function(first, second) {
+            var dx = second.x - first.x,
+                dy = second.y - first.y;
+
+            return Math.sqrt((dx * dx) + (dy * dy));
+        },
+        midPoint: function(first, second) {
+            return {
+                x: (first.x + second.x) / 2,
+                y: (first.y + second.y) / 2
+            };
+        },
+        slope: function(first, second) {
+            return (second.x - first.x) / (second.y - first.y);
+        },
+        unitVector: function(first, second) {
+            var distance = this.distance(first, second);
+
+            return {
+                x: (second.x - first.x) / distance,
+                y: (second.y - first.y) / distance
+            };
+        }
     };
 }]);
