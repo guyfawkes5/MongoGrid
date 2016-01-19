@@ -29,16 +29,22 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                         perpDist = (dist / 3),
                         unitVector = ChartUtils.unitVector(midpoint, target),
 
-                        hiltX = ((-unitVector.y * perpDist) + midpoint.x),
-                        hiltY = ((unitVector.x * perpDist * orient) + midpoint.y),
-                        contX = (target.x + (q * perpDist * unitVector.y)),
-                        contY = (target.y + (q * perpDist * unitVector.x * orient)),
-                        endX = (target.x - (dist / 2 * unitVector.x) + ((1 - q) * perpDist * unitVector.y)),
-                        endY = (target.y - (dist / 2 * unitVector.y) + ((1 - q) * perpDist * unitVector.x * orient));
+                        hilt = {
+                            x: (-unitVector.y * perpDist) + midpoint.x,
+                            y: (unitVector.x * perpDist * orient) + midpoint.y
+                        },
+                        cont = {
+                            x: target.x + (q * perpDist * unitVector.y),
+                            y: target.y + (q * perpDist * unitVector.x * orient)
+                        },
+                        end = {
+                            x: target.x - (dist / 2 * unitVector.x) + ((1 - q) * perpDist * unitVector.y),
+                            y: target.y - (dist / 2 * unitVector.y) + ((1 - q) * perpDist * unitVector.x * orient)
+                        };
 
                 return 'M' + [target.y, target.x] +
-                    'Q' + [contY, contX] + ' ' + [endY, endX] +
-                    'T' + [hiltY, hiltX];
+                    'Q' + [cont.y, cont.x] + ' ' + [end.y, end.x] +
+                    'T' + [hilt.y, hilt.x];
             },
 
             oldNode, clickListener;
