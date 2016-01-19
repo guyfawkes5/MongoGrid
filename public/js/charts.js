@@ -11,55 +11,32 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
 
             findOpposingTarget = function(origin, target) {
                 return origin.children.find(function(child, i, cn) {
-                    return (i === 0 || i === cn.length - 1) && child !== target;
+                    return (i === 0 || i === cn.length - 1) && ((child !== target) === (cn.length !== 1));
                 });
             },
 
             braces = function(d) {
                     var q = 0.6,
-                        overreachProp = 0.1,
-                        overreachMin = 20,
 
                         origin = d.source,
                         target = d.target,
                         oppTarget = findOpposingTarget(origin, target),
+                        midpoint = ChartUtils.midPoint(target, oppTarget),
 
-                        orgX = origin.x,
-                        orgY = origin.y,
-                        tarX = target.x,
-                        tarY = target.y,
-                        midX = ((tarX + oppTarget.x) / 2),
-                        midY = ((tarY + oppTarget.y) / 2),
-
-                        slopeToOrg = ((tarX - orgX) / (tarY - orgY)),
-                        orient = (slopeToOrg <= 0 ? 1 : -1),
-
-                        dx = (tarX - midX),
-                        dy = (tarY - midY),
-
-                        dist = Math.sqrt((dx * dx) + (dy * dy)),
+                        slope = ChartUtils.slope(origin, target),
+                        orient = (slope <= 0 ? 1 : -1),
+                        dist = ChartUtils.distance(target, midpoint),
                         perpDist = (dist / 3),
-                        dx = (dx / dist),
-                        dy = (dy / dist),
+                        unitVector = ChartUtils.unitVector(midpoint, target),
 
-                        tarX = (tarX - ((Math.max(overreachProp * dist, overreachMin) * orient))),
+                        hiltX = ((-unitVector.y * perpDist) + midpoint.x),
+                        hiltY = ((unitVector.x * perpDist * orient) + midpoint.y),
+                        contX = (target.x + (q * perpDist * unitVector.y)),
+                        contY = (target.y + (q * perpDist * unitVector.x * orient)),
+                        endX = (target.x - (dist / 2 * unitVector.x) + ((1 - q) * perpDist * unitVector.y)),
+                        endY = (target.y - (dist / 2 * unitVector.y) + ((1 - q) * perpDist * unitVector.x * orient));
 
-                        dx = (tarX - midX),
-                        dy = (tarY - midY),
-
-                        dist = Math.sqrt((dx * dx) + (dy * dy)),
-                        perpDist = (dist / 3),
-                        dx = (dx / dist),
-                        dy = (dy / dist),
-
-                        hiltX = ((-dy * perpDist) + midX),
-                        hiltY = ((dx * perpDist * orient) + midY),
-                        contX = (tarX + (q * perpDist * dy)),
-                        contY = (tarY + (q * perpDist * dx * orient)),
-                        endX = (tarX - (dist / 2 * dx) + ((1 - q) * perpDist * dy)),
-                        endY = (tarY - (dist / 2 * dy) + ((1 - q) * perpDist * dx * orient));
-
-                return 'M' + [tarY, tarX] +
+                return 'M' + [target.y, target.x] +
                     'Q' + [contY, contX] + ' ' + [endY, endX] +
                     'T' + [hiltY, hiltX];
             },
@@ -136,7 +113,7 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                 .text(function (d) {
                     return d.name + (d.type ? ' (' + d.type + ')' : '' );
                 });
-            console.log(braceTarget);
+
             if (clickListener) {
                 node.on('click', clickListener);
             }
@@ -231,10 +208,17 @@ charts.factory('ChartUtils', [function() {
         unitVector: function(first, second) {
             var distance = this.distance(first, second);
 
-            return {
-                x: (second.x - first.x) / distance,
-                y: (second.y - first.y) / distance
-            };
+            if (distance === 0) {
+                return {
+                    x: 0,
+                    y: 0
+                };
+            } else {
+                return {
+                    x: (second.x - first.x) / distance,
+                    y: (second.y - first.y) / distance
+                };
+            }
         }
     };
 }]);
