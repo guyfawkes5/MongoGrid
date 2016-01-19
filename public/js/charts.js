@@ -87,9 +87,7 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                     .attr('stroke-width', function (d) {
                         var target = d.target,
                             other = findOpposingTarget(d.source, target),
-                            dx = (other.x - target.x),
-                            dy = (other.y - target.y),
-                            dist = Math.sqrt((dx * dx) + (dy * dy));
+                            dist = ChartUtils.distance(target, other);
 
                         return (Math.round(dist) / 100) + 'px';
                     }),
