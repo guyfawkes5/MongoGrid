@@ -22,6 +22,8 @@ mongoControllers.controller('chartContainer', ['$element', '$window', '$scope', 
     });
 
     MongoDB.schema().$promise.then(function(data) {
+        data.children[3].children.pop();
+        data.children[3].children.pop();
         chart.data(data.toJSON()).draw(chartEl);
     });
 
