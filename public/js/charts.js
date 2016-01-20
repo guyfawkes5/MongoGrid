@@ -9,42 +9,44 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
             horizMargin = 80,
             vertMargin = 20,
 
-            findOpposingTarget = function(origin, target) {
-                return origin.children.find(function(child, i, cn) {
-                    return (i === 0 || i === cn.length - 1) && ((child !== target) === (cn.length !== 1));
-                });
+            generateBrace = function(origin, edge, centre) {
+                var q = 0.6,
+
+                    slope = ChartUtils.slope(origin, edge),
+                    orient = (slope <= 0 ? 1 : -1),
+                    dist = ChartUtils.distance(edge, centre),
+                    perpDist = (dist / 3),
+                    unitVector = ChartUtils.unitVector(centre, edge);
+
+                return {
+                    hilt: {
+                        x: (-unitVector.y * perpDist) + centre.x,
+                        y: (unitVector.x * perpDist * orient) + centre.y
+                    },
+                    cont: {
+                        x: edge.x + (q * perpDist * unitVector.y),
+                        y: edge.y + (q * perpDist * unitVector.x * orient)
+                    },
+                    end: {
+                        x: edge.x - (dist / 2 * unitVector.x) + ((1 - q) * perpDist * unitVector.y),
+                        y: edge.y - (dist / 2 * unitVector.y) + ((1 - q) * perpDist * unitVector.x * orient)
+                    }
+                };
             },
 
             braces = function(d) {
-                    var q = 0.6,
-
-                        origin = d.source,
-                        target = d.target,
-                        oppTarget = findOpposingTarget(origin, target),
-                        midpoint = ChartUtils.midPoint(target, oppTarget),
-
-                        slope = ChartUtils.slope(origin, target),
-                        orient = (slope <= 0 ? 1 : -1),
-                        dist = ChartUtils.distance(target, midpoint),
-                        perpDist = (dist / 3),
-                        unitVector = ChartUtils.unitVector(midpoint, target),
-
-                        hilt = {
-                            x: (-unitVector.y * perpDist) + midpoint.x,
-                            y: (unitVector.x * perpDist * orient) + midpoint.y
-                        },
-                        cont = {
-                            x: target.x + (q * perpDist * unitVector.y),
-                            y: target.y + (q * perpDist * unitVector.x * orient)
-                        },
-                        end = {
-                            x: target.x - (dist / 2 * unitVector.x) + ((1 - q) * perpDist * unitVector.y),
-                            y: target.y - (dist / 2 * unitVector.y) + ((1 - q) * perpDist * unitVector.x * orient)
-                        };
+                var origin = d.source,
+                    target = d.target,
+                    other = target.other,
+                    braceCentre = ChartUtils.midPoint(target, other),
+                    leftBrace = generateBrace(origin, target, braceCentre),
+                    rightBrace = generateBrace(origin, other, braceCentre);
 
                 return 'M' + [target.y, target.x] +
-                    'Q' + [cont.y, cont.x] + ' ' + [end.y, end.x] +
-                    'T' + [hilt.y, hilt.x];
+                    'Q' + [leftBrace.cont.y, leftBrace.cont.x] + ' ' + [leftBrace.end.y, leftBrace.end.x] +
+                    'T' + [leftBrace.hilt.y, leftBrace.hilt.x] + 'M' + [other.y, other.x] +
+                    'Q' + [rightBrace.cont.y, rightBrace.cont.x] + ' ' + [rightBrace.end.y, rightBrace.end.x] +
+                    'T' + [rightBrace.hilt.y, rightBrace.hilt.x];
             },
 
             oldNode, clickListener;
@@ -62,26 +64,18 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                 nodes = tree.nodes(data),
                 links = tree.links(nodes),
 
-                braceTarget = [links[0].target, links[links.length - 1].target].reduce(function(prev, curr) {
-                    return {
-                        first: {
-                            x: prev.x,
-                            y: prev.y
-                        },
-                        second: {
-                            x: curr.x,
-                            y: curr.y
-                        }
-                    };
-                }),
-
                 outerLinks = links.filter(function (attr) {
-                    var children = attr.source.children,
-                        childIndex = children.indexOf(attr.target),
-                        isFirst = (childIndex === 0),
-                        isLast = (childIndex === children.length - 1);
+                    var target = attr.target,
+                        children = attr.source.children,
+                        childIndex = children.indexOf(target),
+                        isFirstChild = (childIndex === 0),
+                        lastChild = children[children.length - 1];
 
-                    return isFirst || isLast;
+                    if (isFirstChild) {
+                        target.other = lastChild;
+                    }
+
+                    return isFirstChild;
                 }),
 
                 brace = svg.selectAll('path.brace')
@@ -92,7 +86,7 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                     .attr('d', braces)
                     .attr('stroke-width', function (d) {
                         var target = d.target,
-                            other = findOpposingTarget(d.source, target),
+                            other = target.other,
                             dist = ChartUtils.distance(target, other);
 
                         return (Math.round(dist) / 100) + 'px';
