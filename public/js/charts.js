@@ -56,6 +56,21 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                 return Math.max((Math.round(dist) / 100), minWidth);
             },
 
+            filterLinksToBraceTargets = function (attr) {
+                var target = attr.target,
+                    children = attr.source.children,
+                    childIndex = children.indexOf(target),
+                    isFirstChild = (childIndex === 0),
+                    lastChild = children[children.length - 1];
+
+                if (isFirstChild) {
+                    target.isSinglePoint = (target === lastChild);
+                    target.other = lastChild;
+                }
+
+                return isFirstChild;
+            },
+
             bracesPath = function(d) {
                 var singleWidthVector = {
                         x: 40,
@@ -84,12 +99,40 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                     'T' + [rightBrace.hilt.y, rightBrace.hilt.x];
             },
 
+            drawStemPolyPoints = function(d) {
+                var width = getStrokeWidth(d),
+                    widthVector = {
+                        x: 1,
+                        y: 0
+                    },
+                    source = d.source,
+                    target = d.target,
+                    other = target.other,
+                    centre = ChartUtils.midPoint(target, other),
+                    orient = (ChartUtils.slope(target, other) <= 0 ? 1 : -1),
+                    hiltLength =  Math.max(ChartUtils.distance(target, other) / 2 * perpDistProportion, minPerpDist),
+                    hilt = {
+                        x: hiltLength * widthVector.y,
+                        y: hiltLength * widthVector.x
+                    },
+                    end = {
+                        x: (centre.x - source.x - hilt.x) * -orient,
+                        y: (centre.y - source.y - hilt.y) * -orient
+                    },
+                    xWidth = (width / 2 * widthVector.x),
+                    yWidth = (width / 2 * widthVector.y);
+
+                return [0, 0] +
+                    ' ' + [end.y + (yWidth * orient), end.x + (xWidth * orient)] +
+                    ' ' + [end.y + (yWidth * -orient), end.x + (xWidth * -orient)];
+            },
+
             oldNode, clickListener;
 
         function SchemaTree(selection) {
-            selection.selectAll('svg').remove();
+            selection.select('svg').selectAll('*').remove();
 
-            var svg = selection.append('svg')
+            var svg = selection.select('svg')
                 .attr('width', width)
                 .attr('height', height)
                 .append('g')
@@ -99,30 +142,7 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                 nodes = tree.nodes(data),
                 links = tree.links(nodes),
 
-                outerLinks = links.filter(function (attr) {
-                    var target = attr.target,
-                        children = attr.source.children,
-                        childIndex = children.indexOf(target),
-                        isFirstChild = (childIndex === 0),
-                        lastChild = children[children.length - 1];
-
-                    if (isFirstChild) {
-                        target.isSinglePoint = (target === lastChild);
-                        target.other = lastChild;
-                    }
-
-                    return isFirstChild;
-                }),
-
-                braces = svg.selectAll('path.brace')
-                    .data(outerLinks)
-                    .enter()
-                    .append('path')
-                    .attr('class', 'brace')
-                    .attr('d', bracesPath)
-                    .attr('stroke-width', function(d) {
-                        return getStrokeWidth(d) + 'px';
-                    }),
+                outerLinks = links.filter(filterLinksToBraceTargets),
 
                 node = svg.selectAll('g.node')
                     .data(nodes)
@@ -131,44 +151,28 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                     .attr('class', 'node')
                     .attr('transform', function (d) {
                         return 'translate(' + d.y + ',' + d.x + ')';
-                    }),
-
-                stems = svg.selectAll('polygon.stem')
-                    .data(outerLinks)
-                    .enter()
-                    .insert('polygon', ':first-child')
-                    .attr('class', 'stem')
-                    .attr('points', function(d) {
-                        var width = getStrokeWidth(d),
-                            widthVector = {
-                                x: 1,
-                                y: 0
-                            },
-                            source = d.source,
-                            target = d.target,
-                            other = target.other,
-                            centre = ChartUtils.midPoint(target, other),
-                            orient = (ChartUtils.slope(target, other) <= 0 ? 1 : -1),
-                            hiltLength =  Math.max(ChartUtils.distance(target, other) / 2 * perpDistProportion, minPerpDist),
-                            hilt = {
-                                x: hiltLength * widthVector.y,
-                                y: hiltLength * widthVector.x
-                            },
-                            end = {
-                                x: (centre.x - source.x - hilt.x) * -orient,
-                                y: (centre.y - source.y - hilt.y) * -orient
-                            },
-                            xWidth = (width / 2 * widthVector.x),
-                            yWidth = (width / 2 * widthVector.y);
-
-                        return [0, 0] +
-                            ' ' + [end.y + (yWidth * orient), end.x + (xWidth * orient)] +
-                            ' ' + [end.y + (yWidth * -orient), end.x + (xWidth * -orient)];
-                    })
-                    .attr('transform', function (d) {
-                        var source = d.source;
-                        return 'translate(' + source.y + ',' + source.x + ')';
                     });
+
+            svg.selectAll('path.brace')
+                .data(outerLinks)
+                .enter()
+                .append('path')
+                .attr('class', 'brace')
+                .attr('d', bracesPath)
+                .attr('stroke-width', function(d) {
+                    return getStrokeWidth(d) + 'px';
+                });
+
+            svg.selectAll('polygon.stem')
+                .data(outerLinks)
+                .enter()
+                .insert('polygon', ':first-child')
+                .attr('class', 'stem')
+                .attr('points', drawStemPolyPoints)
+                .attr('transform', function (d) {
+                    var source = d.source;
+                    return 'translate(' + source.y + ',' + source.x + ')';
+                });
 
             node.append('circle')
                 .attr('r', 4.5);
