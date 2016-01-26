@@ -11,6 +11,7 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
             perpDistProportion = 0.3,
             minPerpDist = 15,
             nodePadding = 2,
+            duration = 750,
 
             generateBrace = function(origin, edge, centre) {
                 var slope = ChartUtils.slope(origin, edge),
@@ -145,15 +146,16 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                 outerLinks = links.filter(filterLinksToBraceTargets),
 
                 node = svg.selectAll('g.node')
-                    .data(nodes)
-                    .enter()
+                    .data(nodes),
+
+                nodeEnter = node.enter()
                     .append('g')
                     .attr('class', 'node')
                     .attr('transform', function (d) {
-                        return 'translate(' + d.y + ',' + d.x + ')';
-                    });
+                        return 'translate(' + (d.y0 || d.y) + ',' + (d.x0 || d.x) + ')';
+                    }),
 
-            svg.selectAll('path.brace')
+                braces = svg.selectAll('path.brace')
                 .data(outerLinks)
                 .enter()
                 .append('path')
@@ -174,10 +176,10 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                     return 'translate(' + source.y + ',' + source.x + ')';
                 });
 
-            node.append('circle')
+            nodeEnter.append('circle')
                 .attr('r', 4.5);
 
-            node.append('text')
+            nodeEnter.append('text')
                 .attr('dx', 8)
                 .attr('dy', 3)
                 .attr('text-anchor', 'start')
@@ -185,7 +187,7 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                     return d.name + (d.type ? ' (' + d.type + ')' : '' );
                 });
 
-            node.insert('rect', ':first-child')
+            nodeEnter.insert('rect', ':first-child')
                 .attr('class', 'text-bg')
                 .attr('width', function() {
                     return this.parentNode.getBBox().width + (nodePadding * 2);
@@ -200,9 +202,29 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                     return this.parentNode.getBBox().y;
                 });
 
+            node.transition()
+                .duration(duration)
+                .attr("transform", function(d) {
+                    return "translate(" + d.y + "," + d.x + ")";
+                });
+
+            braces.transition()
+                .duration(duration)
+                .tween('d', function(d) {
+                    return function(t) {
+                        console.log(d, t);
+                        return bracesPath(d);
+                    };
+                });
+
             if (clickListener) {
                 node.on('click', clickListener);
             }
+
+            nodes.forEach(function(d) {
+                d.x0 = d.x;
+                d.y0 = d.y;
+            });
         }
 
         SchemaTree.data = function(value) {

@@ -6,7 +6,7 @@ mongoControllers.controller('mongoController', ['$scope', function($scope) {
     });
 }]);
 
-mongoControllers.controller('chartContainer', ['$element', '$window', '$scope', 'SchemaTree', 'MongoDB', function($element, $window, $scope, SchemaTree, MongoDB) {
+mongoControllers.controller('chartContainer', ['$element', '$window', '$scope', 'SchemaTree', 'MongoDB', '$timeout', function($element, $window, $scope, SchemaTree, MongoDB, $timeout) {
     var chartEl = $element.children(),
         chart = SchemaTree()
             .width(chartEl.prop('offsetWidth'))
@@ -15,10 +15,24 @@ mongoControllers.controller('chartContainer', ['$element', '$window', '$scope', 
             .vertMargin(20)
             .onClick(function(data) {
                 $scope.$emit('schemaClick', parseItemToParents(data));
-            });
+            }),
+        resizeDelay = 1000;
 
     $scope.$on('resize', function() {
-        chart.width(chartEl.prop('offsetWidth')).height(chartEl.prop('offsetHeight')).draw();
+
+        if ($scope.resizePromise) {
+            var couldntCancel = !$timeout.cancel($scope.resizePromise);
+            if (couldntCancel) {
+                return;
+            }
+        }
+
+        $scope.resizePromise = $timeout(resizeDelay);
+
+        $scope.resizePromise.then(function () {
+            delete $scope.resizePromise;
+            chart.width(chartEl.prop('offsetWidth')).height(chartEl.prop('offsetHeight')).draw();
+        });
     });
 
     MongoDB.schema().$promise.then(function(data) {
