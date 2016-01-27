@@ -31,13 +31,21 @@
   fill: none;
   stroke: #444444;
 }
-
+/* line 29, ../sass/style.scss */
+#d3-cont #chart-el .stem {
+  fill: #444444;
+}
 /* line 32, ../sass/style.scss */
+#d3-cont #chart-el .text-bg {
+  fill: #FFFFFF;
+}
+
+/* line 38, ../sass/style.scss */
 #values {
   width: 32vw;
 }
 
-/* line 36, ../sass/style.scss */
+/* line 42, ../sass/style.scss */
 .panel {
   margin: 2vh 2vw;
   height: 96vh;
@@ -45,34 +53,34 @@
   margin-bottom: 2vh !important;
 }
 
-/* line 43, ../sass/style.scss */
+/* line 49, ../sass/style.scss */
 #background {
   background-color: #999999;
   width: 100vw;
   height: 100vh;
 }
 
-/* line 53, ../sass/style.scss */
+/* line 59, ../sass/style.scss */
 .value-grid table thead tr th {
   cursor: pointer;
   white-space: nowrap;
 }
-/* line 57, ../sass/style.scss */
+/* line 63, ../sass/style.scss */
 .value-grid table thead tr th:after {
   content: '\0020';
   margin-left: 5px;
   width: 1em;
   display: inline-block;
 }
-/* line 64, ../sass/style.scss */
+/* line 70, ../sass/style.scss */
 .value-grid table thead tr th.st-sort-ascent:after {
   content: '\25B2';
 }
-/* line 68, ../sass/style.scss */
+/* line 74, ../sass/style.scss */
 .value-grid table thead tr th.st-sort-descent:after {
   content: '\25BC';
 }
-/* line 73, ../sass/style.scss */
+/* line 79, ../sass/style.scss */
 .value-grid table tbody tr.st-selected {
   color: #FFFFFF;
   background-color: #F48542;

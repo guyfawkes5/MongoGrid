@@ -48,10 +48,8 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                 };
             },
 
-            getStrokeWidth = function (d) {
-                var target = d.target,
-                    other = target.other,
-                    dist = ChartUtils.distance(target, other),
+            getStrokeWidth = function (target, other) {
+                var dist = ChartUtils.distance(target, other),
                     minWidth = 1;
 
                 return Math.max((Math.round(dist) / 100), minWidth);
@@ -72,22 +70,19 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                 return isFirstChild;
             },
 
-            bracesPath = function(d) {
+            bracesPath = function(target, origin, isSingle, other) {
                 var singleWidthVector = {
                         x: 40,
                         y: 0
                     },
-
-                    isSingle = d.target.isSinglePoint,
                     target = isSingle ? {
-                        x: d.target.x + (singleWidthVector.x / 2),
-                        y: d.target.y + (singleWidthVector.y / 2)
-                    } : d.target,
+                        x: target.x + (singleWidthVector.x / 2),
+                        y: target.y + (singleWidthVector.y / 2)
+                    } : target,
                     other = isSingle ? {
                         x: target.x - singleWidthVector.x,
                         y: target.y - singleWidthVector.y
-                    } : target.other,
-                    origin = d.source,
+                    } : other,
 
                     braceCentre = ChartUtils.midPoint(target, other),
                     leftBrace = generateBrace(origin, target, braceCentre),
@@ -100,15 +95,12 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                     'T' + [rightBrace.hilt.y, rightBrace.hilt.x];
             },
 
-            drawStemPolyPoints = function(d) {
-                var width = getStrokeWidth(d),
+            drawStemPolyPoints = function(target, source, other) {
+                var width = getStrokeWidth(target, other),
                     widthVector = {
                         x: 1,
                         y: 0
                     },
-                    source = d.source,
-                    target = d.target,
-                    other = target.other,
                     centre = ChartUtils.midPoint(target, other),
                     orient = (ChartUtils.slope(target, other) <= 0 ? 1 : -1),
                     hiltLength =  Math.max(ChartUtils.distance(target, other) / 2 * perpDistProportion, minPerpDist),
@@ -156,24 +148,56 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                     }),
 
                 braces = svg.selectAll('path.brace')
-                .data(outerLinks)
-                .enter()
+                    .data(outerLinks),
+
+                stem = svg.selectAll('polygon.stem')
+                    .data(outerLinks);
+
+            braces.enter()
                 .append('path')
                 .attr('class', 'brace')
-                .attr('d', bracesPath)
+                .attr('d', function(d) {
+                    var target = d.target,
+                        source = d.source,
+                        other = target.other;
+
+                    return bracesPath({
+                        x: target.x0 || target.x,
+                        y: target.y0 || target.y
+                    }, {
+                        x: source.x0 || source.x,
+                        y: source.y0 || source.y
+                    }, target.isSinglePoint, {
+                        x: other.x0 || other.x,
+                        y: other.y0 || other.y
+                    });
+                })
                 .attr('stroke-width', function(d) {
-                    return getStrokeWidth(d) + 'px';
+                    return getStrokeWidth(d.target, d.target.other) + 'px';
                 });
 
-            svg.selectAll('polygon.stem')
-                .data(outerLinks)
-                .enter()
+            stem.enter()
                 .insert('polygon', ':first-child')
                 .attr('class', 'stem')
-                .attr('points', drawStemPolyPoints)
+                .attr('points', function(d) {
+                    var target = d.target,
+                        source = d.source,
+                        other = target.other;
+
+                    return drawStemPolyPoints({
+                        x: target.x0 || target.x,
+                        y: target.y0 || target.y
+                    }, {
+                        x: source.x0 || source.x,
+                        y: source.y0 || source.y
+                    }, {
+                        x: other.x0 || other.x,
+                        y: other.y0 || other.y
+                    });
+                })
                 .attr('transform', function (d) {
                     var source = d.source;
-                    return 'translate(' + source.y + ',' + source.x + ')';
+                    return 'translate(' + (source.y0 || source.y) + ',' + (source.x0 || source.x) + ')';
                 });
 
             nodeEnter.append('circle')
@@ -210,16 +234,33 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
 
             braces.transition()
                 .duration(duration)
-                .tween('d', function(d) {
-                    return function(t) {
-                        console.log(d, t);
-                        return bracesPath(d);
-                    };
+                .attr('d', function(d) {
+                    return bracesPath(d.target, d.source, d.target.isSinglePoint, d.target.other);
+                });
+
+            stem.transition()
+                .duration(duration)
+                .attr('points', function(d) {
+                    return drawStemPolyPoints(d.target, d.source, d.target.other);
+                })
+                .attr('transform', function (d) {
+                    var source = d.source;
+                    return 'translate(' + source.y + ',' + source.x + ')';
                 });
 
             if (clickListener) {
                 node.on('click', clickListener);
             }
+
+            outerLinks.forEach(function(d) {
+                var source = d.source,
+                    target = d.target;
+
+                source.x0 = source.x;
+                source.y0 = source.y;
+                target.x0 = target.x;
+                target.y0 = target.y;
+            });
 
             nodes.forEach(function(d) {
                 d.x0 = d.x;
