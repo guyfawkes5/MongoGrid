@@ -1,18 +1,18 @@
 var mongoServices = angular.module('mongoServices', ['ngResource']);
 
 mongoServices.factory('MongoDB', ['$resource', function($resource) {
-    return $resource('mongo/:verb', {}, {
+    return $resource('mongo/:resource', {}, {
         get: {
             method: 'GET',
             isArray: true,
             params: {
-                query: '@queryString'
+                value: '@value'
             }
         },
         schema: {
             method: 'GET',
             params: {
-                verb: 'schema'
+                resource: 'schema'
             }
         }
     });

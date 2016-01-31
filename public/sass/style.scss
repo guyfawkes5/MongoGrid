@@ -12,6 +12,16 @@
         .node {
             cursor: pointer;
 
+            &.selected-node {
+                circle {
+                    fill: #F48542;
+                }
+
+                text {
+                    font-weight: bold;
+                }
+            }
+
             circle {
                 fill: #FFFFFF;
                 stroke: #F48542;

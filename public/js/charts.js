@@ -12,6 +12,7 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
             minPerpDist = 15,
             nodePadding = 2,
             duration = 750,
+            formerSelection = null,
 
             generateBrace = function(origin, edge, centre) {
                 var slope = ChartUtils.slope(origin, edge),
@@ -143,6 +144,9 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                 nodeEnter = node.enter()
                     .append('g')
                     .attr('class', 'node')
+                    .attr('class', function(d) {
+                        return 'node' + (d.selected ? ' selected-node' : '');
+                    })
                     .attr('transform', function (d) {
                         return 'translate(' + (d.y0 || d.y) + ',' + (d.x0 || d.x) + ')';
                     }),
@@ -249,7 +253,16 @@ charts.factory('SchemaTree', ['$window', 'ChartUtils', function($window, ChartUt
                 });
 
             if (clickListener) {
-                node.on('click', clickListener);
+                node.on('click', function(d) {
+                    if (formerSelection) {
+                        formerSelection.selected = false;
+                    }
+
+                    d.selected = true;
+                    formerSelection = d;
+                    clickListener(d);
+                    SchemaTree.draw();
+                });
             }
 
             outerLinks.forEach(function(d) {

@@ -9,8 +9,11 @@ router.get('/schema', function(req, res) {
     });
 });
 
-router.get('/', function(req, res) {
-   db.get(req.query.queryString).then(function(docs) {
+router.get('/:resource', function(req, res) {
+   db.get({
+       name: req.params.resource,
+       value: req.query.value
+   }).then(function(docs) {
        res.json(docs);
    });
 });

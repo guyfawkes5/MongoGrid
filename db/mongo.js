@@ -181,15 +181,23 @@ function getKeys() {
     return gotKeys.promise;
 }
 
-function get(queryString) {
-    var queryResponse = Q.defer();
+function get(criteria) {
+    var key = criteria.name,
+        value = criteria.value,
+        isValueSearch = !!value,
+        queryResponse = Q.defer(),
         query = {},
-        filter = {
-            _id: false
-        };
+        filter = {};
 
-    query[queryString] = {$exists: true};
-    filter[queryString] = true;
+    if (!isValueSearch) {
+        query[key] = {
+            $exists: true
+        };
+        filter._id = false;
+        filter[key] = true;
+    } else {
+        query[key] = value;
+    }
 
     db.collection('exchanges').find(query, filter, function(err, cursor) {
         if (!err) {

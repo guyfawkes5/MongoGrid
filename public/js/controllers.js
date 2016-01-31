@@ -36,12 +36,8 @@ mongoControllers.controller('chartContainer', ['$element', '$window', '$scope', 
     });
 
     MongoDB.schema().$promise.then(function(data) {
-        data.children[3].children.pop();
-        data.children[3].children.pop();
         chart.data(data.toJSON()).draw(chartEl);
     });
-
-    $window.chart = chart;
 
     function parseItemToParents(data) {
         if (data.depth === 0) {
@@ -67,14 +63,21 @@ mongoControllers.controller('valueGridController', ['$scope', 'MongoDB', functio
         var keys = lookup.keys,
             type = lookup.type;
 
-        MongoDB.get({queryString: keys.join('.')}).$promise.then(function(data) {
+        MongoDB.get({resource: keys.join('.')}).$promise.then(function(data) {
             $scope.rowCollection = formatToRows(data, keys, type);
             $scope.displayedCollection = [].concat($scope.rowCollection);
         });
     });
 
     $scope.$on('select', function($event, data) {
-        console.log(arguments);
+        MongoDB.get({
+            resource: data.name,
+            value: data.value
+        }).$promise.then(function(docs) {
+            docs.forEach(function(doc) {
+
+            });
+        });
     });
 
     function formatToRows(data, schemaKeys, schemaType) {
