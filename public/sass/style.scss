@@ -1,9 +1,18 @@
 #app-cont {
     display: inline-flex;
+    flex-flow: row wrap;
+}
+
+#d3-cont, #status {
+    width: 62vw;
+}
+
+#status, #selections {
+    height: 28vh;
 }
 
 #d3-cont {
-    width: 60vw;
+    height: 68vh;
 
     #chart-el {
         width: 99%;
@@ -45,21 +54,27 @@
     }
 }
 
-#values {
-    width: 32vw;
+#values, #selections {
+    width: 34vw;
+}
+
+#selections {
+    height: 28vh;
+}
+
+#value {
+    height: 28vh;
 }
 
 .panel {
-    margin: 2vh 2vw;
-    height: 96vh;
+    margin: 1vh 1vw;
     overflow: auto;
-    margin-bottom: 2vh !important;
+    margin-bottom: 1vh !important;
 }
 
 #background {
     background-color: #999999;
-    width: 100vw;
-    height: 100vh;
+    display: block;
 }
 
 .value-grid {

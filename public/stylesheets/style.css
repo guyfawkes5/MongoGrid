@@ -1,94 +1,113 @@
 /* line 1, ../sass/style.scss */
 #app-cont {
   display: inline-flex;
+  flex-flow: row wrap;
 }
 
-/* line 5, ../sass/style.scss */
-#d3-cont {
-  width: 60vw;
+/* line 6, ../sass/style.scss */
+#d3-cont, #status {
+  width: 62vw;
 }
-/* line 8, ../sass/style.scss */
+
+/* line 10, ../sass/style.scss */
+#status, #selections {
+  height: 28vh;
+}
+
+/* line 14, ../sass/style.scss */
+#d3-cont {
+  height: 68vh;
+}
+/* line 17, ../sass/style.scss */
 #d3-cont #chart-el {
   width: 99%;
   height: 99%;
 }
-/* line 12, ../sass/style.scss */
+/* line 21, ../sass/style.scss */
 #d3-cont #chart-el .node {
   cursor: pointer;
 }
-/* line 16, ../sass/style.scss */
+/* line 25, ../sass/style.scss */
 #d3-cont #chart-el .node.selected-node circle {
   fill: #F48542;
 }
-/* line 20, ../sass/style.scss */
+/* line 29, ../sass/style.scss */
 #d3-cont #chart-el .node.selected-node text {
   font-weight: bold;
 }
-/* line 25, ../sass/style.scss */
+/* line 34, ../sass/style.scss */
 #d3-cont #chart-el .node circle {
   fill: #FFFFFF;
   stroke: #F48542;
   stroke-width: 1.5px;
 }
-/* line 31, ../sass/style.scss */
+/* line 40, ../sass/style.scss */
 #d3-cont #chart-el .node text {
   font: 10px sans-serif;
 }
-/* line 35, ../sass/style.scss */
+/* line 44, ../sass/style.scss */
 #d3-cont #chart-el .brace, #d3-cont #chart-el .link {
   fill: none;
   stroke: #444444;
 }
-/* line 39, ../sass/style.scss */
+/* line 48, ../sass/style.scss */
 #d3-cont #chart-el .stem {
   fill: #444444;
 }
-/* line 42, ../sass/style.scss */
+/* line 51, ../sass/style.scss */
 #d3-cont #chart-el .text-bg {
   fill: #FFFFFF;
 }
 
-/* line 48, ../sass/style.scss */
-#values {
-  width: 32vw;
+/* line 57, ../sass/style.scss */
+#values, #selections {
+  width: 34vw;
 }
 
-/* line 52, ../sass/style.scss */
-.panel {
-  margin: 2vh 2vw;
-  height: 96vh;
-  overflow: auto;
-  margin-bottom: 2vh !important;
+/* line 61, ../sass/style.scss */
+#selections {
+  height: 28vh;
 }
 
-/* line 59, ../sass/style.scss */
-#background {
-  background-color: #999999;
-  width: 100vw;
-  height: 100vh;
+/* line 65, ../sass/style.scss */
+#value {
+  height: 28vh;
 }
 
 /* line 69, ../sass/style.scss */
+.panel {
+  margin: 1vh 1vw;
+  overflow: auto;
+  margin-bottom: 1vh !important;
+}
+
+/* line 75, ../sass/style.scss */
+#background {
+  background-color: #999999;
+  display: block;
+}
+
+/* line 84, ../sass/style.scss */
 .value-grid table thead tr th {
   cursor: pointer;
   white-space: nowrap;
 }
-/* line 73, ../sass/style.scss */
+/* line 88, ../sass/style.scss */
 .value-grid table thead tr th:after {
   content: '\0020';
   margin-left: 5px;
   width: 1em;
   display: inline-block;
 }
-/* line 80, ../sass/style.scss */
+/* line 95, ../sass/style.scss */
 .value-grid table thead tr th.st-sort-ascent:after {
   content: '\25B2';
 }
-/* line 84, ../sass/style.scss */
+/* line 99, ../sass/style.scss */
 .value-grid table thead tr th.st-sort-descent:after {
   content: '\25BC';
 }
-/* line 89, ../sass/style.scss */
+/* line 104, ../sass/style.scss */
 .value-grid table tbody tr.st-selected {
   color: #FFFFFF;
   background-color: #F48542;
