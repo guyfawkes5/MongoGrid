@@ -8,7 +8,7 @@
   "dependencies": {
     "angular": "^1.4.4",
     "angular-bootstrap-npm": "^0.14.3",
-    "angular-resource": "^1.4.7",
+    "npm install": "^1.4.7",
     "angular-route": "^1.4.7",
     "angular-smart-table": "2.1.4",
     "body-parser": "^1.13.3",
@@ -23,5 +23,12 @@
     "morgan": "~1.6.1",
     "q": "^1.4.1",
     "serve-favicon": "~2.3.0"
+  },
+  "devDependencies": {
+    "angular-mocks": "^1.5.2",
+    "jasmine": "^2.4.1",
+    "karma": "^0.13.22",
+    "karma-chrome-launcher": "^0.2.3",
+    "karma-jasmine": "^0.3.8"
   }
 }
